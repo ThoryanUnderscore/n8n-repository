@@ -1,0 +1,180 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "guildIds": [
+          "1483760986199687168"
+        ],
+        "channelIds": [
+          "1483760987000668213"
+        ],
+        "pattern": "contain",
+        "value": "meteo",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-discord-trigger.discordTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "aeb82eb1-e379-4ee2-9c10-30d8b5f112d4",
+      "name": "Discord Trigger",
+      "credentials": {
+        "discordBotTriggerApi": {
+          "id": "IULFckuyWIi0AdQh",
+          "name": "Discord Bot Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.weatherapi.com/v1/current.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "Nice"
+            },
+            {
+              "name": "key",
+              "value": "c1c4f50f6c5a4e21b2d90922262503"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "94d3f1ea-77df-4ea4-91b5-c820d26a1f1a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Voici les données météo actuelles : {{ $json.current.temp_c }}°C avec un ciel {{ $json.current.condition.text }}. Rédige un court résumé.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        368,
+        0
+      ],
+      "id": "c269b011-df28-4548-ab0b-3612be506c1b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        288,
+        208
+      ],
+      "id": "61b64b65-fc65-46c3-a8c1-75dff4521e35",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "77LjovRi6JTlmZbC",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1483760986199687168",
+          "mode": "list",
+          "cachedResultName": "FEURLAND",
+          "cachedResultUrl": "https://discord.com/channels/1483760986199687168"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1483760987000668213",
+          "mode": "list",
+          "cachedResultName": "général",
+          "cachedResultUrl": "https://discord.com/channels/1483760986199687168/1483760987000668213"
+        },
+        "content": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        653,
+        0
+      ],
+      "id": "81485033-614a-4907-957c-d8d4fd28968a",
+      "name": "Send a message",
+      "webhookId": "2c9ee9e6-2fc1-456f-b716-0fdac0dc3690",
+      "credentials": {
+        "discordBotApi": {
+          "id": "POzELQOPR6MXKAQ1",
+          "name": "Discord Bot account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Discord Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "01327da543409dc660f81eb7510e47caf6603f37a5efe39646053254aa8ff87e"
+  }
+}
